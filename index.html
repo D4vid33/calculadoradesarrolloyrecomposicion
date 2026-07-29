@@ -75,10 +75,23 @@
             }, [autenticado]);
 
             useEffect(() => {
-                const totalActual = productosActuales.reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
-                const totalNuevo = productosNuevos.reduce((sum, item) => sum + (Number(item.valorFinal) || 0) * (item.cantidad || 1), 0);
-                setResumen({ totalActual, totalNuevo, upsell: totalNuevo - presupuestoActual });
-            }, [productosActuales, productosNuevos, presupuestoActual]);
+                const totalActual = productosActuales.reduce(
+                    (sum, item) => sum + (Number(item.valor) || 0),
+                    0
+                );
+                const totalNuevo = productosNuevos.reduce(
+                    (sum, item) => sum + (Number(item.valorFinal) || 0) * (Number(item.cantidad) || 1),
+                    0
+                );
+
+                // La situación actual define automáticamente el presupuesto base.
+                setPresupuestoActual(totalActual);
+                setResumen({
+                    totalActual,
+                    totalNuevo,
+                    upsell: totalNuevo - totalActual
+                });
+            }, [productosActuales, productosNuevos]);
 
             const igualarOferta = () => {
                 const diferencia = presupuestoActual - resumen.totalNuevo;
@@ -97,7 +110,7 @@
             const cambiarPeriodicidad = (nuevaPeriodicidad) => {
                 if (periodicidad === nuevaPeriodicidad) return;
                 const factor = nuevaPeriodicidad === 'anual' ? 12 : 1/12;
-                setPresupuestoActual(prev => Math.round(prev * factor));
+                // El presupuesto se recalcula desde la suma de la situación actual.
                 setProductosActuales(prev => prev.map(p => ({ ...p, valor: Math.round(p.valor * factor) })));
                 setProductosNuevos(prev => prev.map(p => ({ ...p, valorFinal: Math.round(p.valorFinal * factor) })));
                 setPeriodicidad(nuevaPeriodicidad);
@@ -134,8 +147,8 @@
                                     <button onClick={() => cambiarPeriodicidad('anual')} className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${periodicidad === 'anual' ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}>Anual</button>
                                 </div>
                                 <div className="bg-white px-4 py-2 rounded-lg border">
-                                    <label className="text-[10px] font-bold text-indigo-500 uppercase">Presupuesto</label>
-                                    <input type="number" className="bg-transparent text-xl font-bold text-indigo-900 outline-none w-28" value={presupuestoActual} onChange={(e) => setPresupuestoActual(Number(e.target.value))} />
+                                    <label className="text-[10px] font-bold text-indigo-500 uppercase">Presupuesto base</label>
+                                    <input type="number" readOnly className="bg-transparent text-xl font-bold text-indigo-900 outline-none w-28 cursor-default" value={presupuestoActual} title="Se calcula automáticamente con la situación actual" />
                                 </div>
                             </div>
                         </header>
