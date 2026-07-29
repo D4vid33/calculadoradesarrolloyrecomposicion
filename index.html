@@ -186,7 +186,22 @@
                                             ))}
                                         </select>
                                         <input type="number" className="col-span-2 p-1.5 text-center text-xs rounded border" placeholder="Cant" value={p.cantidad} onChange={(e) => setProductosNuevos(productosNuevos.map(i => i.id === p.id ? {...i, cantidad: Number(e.target.value)} : i))} />
-                                        <input type="number" className="col-span-4 p-1.5 text-right text-xs rounded border" placeholder="Precio" value={p.valorFinal} onChange={(e) => setProductosNuevos(productosNuevos.map(i => i.id === p.id ? {...i, valorFinal: Number(e.target.value)} : i))} />
+                                        <input
+                                            type="number"
+                                            className="col-span-4 p-1.5 text-right text-xs rounded border"
+                                            placeholder="Total ítem"
+                                            title="Total del ítem: precio unitario × cantidad"
+                                            value={Math.round((Number(p.valorFinal) || 0) * (Number(p.cantidad) || 1))}
+                                            onChange={(e) => {
+                                                const cantidad = Math.max(1, Number(p.cantidad) || 1);
+                                                const totalItem = Number(e.target.value) || 0;
+                                                setProductosNuevos(productosNuevos.map(i =>
+                                                    i.id === p.id
+                                                        ? {...i, valorFinal: totalItem / cantidad}
+                                                        : i
+                                                ));
+                                            }}
+                                        />
                                         <button onClick={() => setProductosNuevos(productosNuevos.filter(i => i.id !== p.id))} className="col-span-1 text-red-400"><Trash2 className="w-4 h-4" /></button>
                                     </div>
                                 ))}
