@@ -1,160 +1,180 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Calculator, Package, RefreshCw, Loader2, Lock } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Recomposición</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide-react"></script>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
 
-export default function RecomposicionCartera() {
-  const [autenticado, setAutenticado] = useState(false);
-  const [password, setPassword] = useState('');
-  const CLAVE_ACCESO = '1234'; 
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { Plus, Trash2, Calculator, Package, RefreshCw, Loader2, Lock } = lucideReact;
 
-  const [tarifarioNuevos, setTarifarioNuevos] = useState([]);
-  const [cargandoTarifas, setCargandoTarifas] = useState(true);
-  const [periodicidad, setPeriodicidad] = useState('mensual');
-  const [presupuestoActual, setPresupuestoActual] = useState(309090);
-  const [productosActuales, setProductosActuales] = useState([
-    { id: 1, descripcion: '[GBP] Presencia Digital', valor: 16484 },
-    { id: 2, descripcion: '[WDAVA] Web Avanza', valor: 103030 },
-    { id: 3, descripcion: '[PACOM] Anuncio Destacado', valor: 16484 },
-    { id: 4, descripcion: '[PLANGRW] Plan Grow', valor: 173090 }
-  ]);
-  const [productosNuevos, setProductosNuevos] = useState([]);
-  const [resumen, setResumen] = useState({ totalActual: 0, totalNuevo: 0, upsell: 0 });
+        function App() {
+            const [autenticado, setAutenticado] = useState(false);
+            const [password, setPassword] = useState('');
+            const CLAVE_ACCESO = '1234'; 
+            const [tarifarioNuevos, setTarifarioNuevos] = useState([]);
+            const [cargandoTarifas, setCargandoTarifas] = useState(true);
+            const [periodicidad, setPeriodicidad] = useState('mensual');
+            const [presupuestoActual, setPresupuestoActual] = useState(309090);
+            const [productosActuales, setProductosActuales] = useState([
+                { id: 1, descripcion: '[GBP] Presencia Digital', valor: 16484 },
+                { id: 2, descripcion: '[WDAVA] Web Avanza', valor: 103030 },
+                { id: 3, descripcion: '[PACOM] Anuncio Destacado', valor: 16484 },
+                { id: 4, descripcion: '[PLANGRW] Plan Grow', valor: 173090 }
+            ]);
+            const [productosNuevos, setProductosNuevos] = useState([]);
+            const [resumen, setResumen] = useState({ totalActual: 0, totalNuevo: 0, upsell: 0 });
 
-  useEffect(() => {
-    if (!autenticado) return;
-    
-    const URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCdCFpmxI9CVD_nzLijiojyOLgZjI0B8R2HLbpII0kaXfWRTqwFzFw35EYGLBFTi_aHteopiRbTW2D/pub?gid=0&single=true&output=csv";
+            useEffect(() => {
+                if (!autenticado) return;
+                const URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCdCFpmxI9CVD_nzLijiojyOLgZjI0B8R2HLbpII0kaXfWRTqwFzFw35EYGLBFTi_aHteopiRbTW2D/pub?gid=0&single=true&output=csv";
 
-    const fetchTarifas = async () => {
-      try {
-        const respuesta = await fetch(URL_GOOGLE_SHEETS);
-        const texto = await respuesta.text();
-        const lineas = texto.split('\n');
-        const tarifas = lineas.slice(1).map(linea => {
-          const [id, nombre, precio, categoria] = linea.split(',');
-          return { id: id?.trim(), nombre: nombre?.trim(), precioBaseSugeridoMensual: Number(precio) || 0, categoria: categoria?.trim() || 'General' };
-        }).filter(item => item.id);
-        setTarifarioNuevos(tarifas);
-      } catch (error) { console.error("Error cargando tarifas:", error); } 
-      finally { setCargandoTarifas(false); }
-    };
-    fetchTarifas();
-  }, [autenticado]);
+                const fetchTarifas = async () => {
+                    try {
+                        const respuesta = await fetch(URL_GOOGLE_SHEETS);
+                        const texto = await respuesta.text();
+                        const lineas = texto.split('\n');
+                        const tarifas = lineas.slice(1).map(linea => {
+                            const [id, nombre, precio, categoria] = linea.split(',');
+                            return { id: id?.trim(), nombre: nombre?.trim(), precioBaseSugeridoMensual: Number(precio) || 0, categoria: categoria?.trim() || 'General' };
+                        }).filter(item => item.id);
+                        setTarifarioNuevos(tarifas);
+                    } catch (error) { console.error("Error cargando tarifas:", error); } 
+                    finally { setCargandoTarifas(false); }
+                };
+                fetchTarifas();
+            }, [autenticado]);
 
-  useEffect(() => {
-    const totalActual = productosActuales.reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
-    const totalNuevo = productosNuevos.reduce((sum, item) => sum + (Number(item.valorFinal) || 0) * (item.cantidad || 1), 0);
-    setResumen({ totalActual, totalNuevo, upsell: totalNuevo - presupuestoActual });
-  }, [productosActuales, productosNuevos, presupuestoActual]);
+            useEffect(() => {
+                const totalActual = productosActuales.reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
+                const totalNuevo = productosNuevos.reduce((sum, item) => sum + (Number(item.valorFinal) || 0) * (item.cantidad || 1), 0);
+                setResumen({ totalActual, totalNuevo, upsell: totalNuevo - presupuestoActual });
+            }, [productosActuales, productosNuevos, presupuestoActual]);
 
-  const igualarOferta = () => {
-    const diferencia = presupuestoActual - resumen.totalNuevo;
-    if (diferencia === 0 || productosNuevos.length === 0) return;
-    const totalActualProporcional = productosNuevos.reduce((sum, p) => sum + (Number(p.valorFinal) * p.cantidad), 0);
-    if (totalActualProporcional === 0) return;
-    
-    setProductosNuevos(productosNuevos.map(p => {
-      const peso = (Number(p.valorFinal) * p.cantidad) / totalActualProporcional;
-      const ajuste = diferencia * peso;
-      const nuevoValor = Math.max(0, Number(p.valorFinal) + (ajuste / p.cantidad));
-      return { ...p, valorFinal: Math.round(nuevoValor) };
-    }));
-  };
+            const igualarOferta = () => {
+                const diferencia = presupuestoActual - resumen.totalNuevo;
+                if (diferencia === 0 || productosNuevos.length === 0) return;
+                const totalActualProporcional = productosNuevos.reduce((sum, p) => sum + (Number(p.valorFinal) * p.cantidad), 0);
+                if (totalActualProporcional === 0) return;
+                
+                setProductosNuevos(productosNuevos.map(p => {
+                    const peso = (Number(p.valorFinal) * p.cantidad) / totalActualProporcional;
+                    const ajuste = diferencia * peso;
+                    const nuevoValor = Math.max(0, Number(p.valorFinal) + (ajuste / p.cantidad));
+                    return { ...p, valorFinal: Math.round(nuevoValor) };
+                }));
+            };
 
-  const cambiarPeriodicidad = (nuevaPeriodicidad) => {
-    if (periodicidad === nuevaPeriodicidad) return;
-    const factor = nuevaPeriodicidad === 'anual' ? 12 : 1/12;
-    setPresupuestoActual(prev => Math.round(prev * factor));
-    setProductosActuales(prev => prev.map(p => ({ ...p, valor: Math.round(p.valor * factor) })));
-    setProductosNuevos(prev => prev.map(p => ({ ...p, valorFinal: Math.round(p.valorFinal * factor) })));
-    setPeriodicidad(nuevaPeriodicidad);
-  };
+            const cambiarPeriodicidad = (nuevaPeriodicidad) => {
+                if (periodicidad === nuevaPeriodicidad) return;
+                const factor = nuevaPeriodicidad === 'anual' ? 12 : 1/12;
+                setPresupuestoActual(prev => Math.round(prev * factor));
+                setProductosActuales(prev => prev.map(p => ({ ...p, valor: Math.round(p.valor * factor) })));
+                setProductosNuevos(prev => prev.map(p => ({ ...p, valorFinal: Math.round(p.valorFinal * factor) })));
+                setPeriodicidad(nuevaPeriodicidad);
+            };
 
-  const formatMoneda = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val);
+            const formatMoneda = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val);
 
-  if (!autenticado) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
-          <Lock className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-4 text-slate-800">Acceso Restringido</h2>
-          <input type="password" placeholder="Contraseña de acceso" className="w-full p-3 border rounded-xl mb-4 bg-slate-50" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <button onClick={() => password === CLAVE_ACCESO ? setAutenticado(true) : alert('Clave incorrecta')} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Entrar</button>
-        </div>
-      </div>
-    );
-  }
+            if (!autenticado) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+                        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+                            <Lock className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
+                            <h2 className="text-xl font-bold mb-4 text-slate-800">Acceso Restringido</h2>
+                            <input type="password" placeholder="Contraseña" className="w-full p-3 border rounded-xl mb-4 bg-slate-50" value={password} onChange={(e) => setPassword(e.target.value)} />
+                            <button onClick={() => password === CLAVE_ACCESO ? setAutenticado(true) : alert('Clave incorrecta')} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Entrar</button>
+                        </div>
+                    </div>
+                );
+            }
 
-  const categorias = [...new Set(tarifarioNuevos.map(t => t.categoria))];
+            const categorias = [...new Set(tarifarioNuevos.map(t => t.categoria))];
 
-  return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-          <h1 className="text-2xl font-bold text-indigo-900 flex items-center gap-2">
-            <Calculator className="w-7 h-7 text-indigo-500" /> Calculadora de Recomposición
-            {cargandoTarifas && <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />}
-          </h1>
-          <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl border">
-            <div className="flex bg-white rounded-lg p-1 shadow-sm">
-              <button onClick={() => cambiarPeriodicidad('mensual')} className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${periodicidad === 'mensual' ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}>Mensual</button>
-              <button onClick={() => cambiarPeriodicidad('anual')} className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${periodicidad === 'anual' ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}>Anual</button>
-            </div>
-            <div className="bg-white px-4 py-2 rounded-lg border">
-              <label className="text-[10px] font-bold text-indigo-500 uppercase">Presupuesto</label>
-              <input type="number" className="bg-transparent text-xl font-bold text-indigo-900 outline-none w-28" value={presupuestoActual} onChange={(e) => setPresupuestoActual(Number(e.target.value))} />
-            </div>
-          </div>
-        </header>
+            return (
+                <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
+                    <div className="max-w-6xl mx-auto space-y-6">
+                        <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                            <h1 className="text-2xl font-bold text-indigo-900 flex items-center gap-2">
+                                <Calculator className="w-7 h-7 text-indigo-500" /> Calculadora de Recomposición
+                                {cargandoTarifas && <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />}
+                            </h1>
+                            <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl border">
+                                <div className="flex bg-white rounded-lg p-1 shadow-sm">
+                                    <button onClick={() => cambiarPeriodicidad('mensual')} className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${periodicidad === 'mensual' ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}>Mensual</button>
+                                    <button onClick={() => cambiarPeriodicidad('anual')} className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${periodicidad === 'anual' ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}>Anual</button>
+                                </div>
+                                <div className="bg-white px-4 py-2 rounded-lg border">
+                                    <label className="text-[10px] font-bold text-indigo-500 uppercase">Presupuesto</label>
+                                    <input type="number" className="bg-transparent text-xl font-bold text-indigo-900 outline-none w-28" value={presupuestoActual} onChange={(e) => setPresupuestoActual(Number(e.target.value))} />
+                                </div>
+                            </div>
+                        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl shadow-sm border p-6">
-            <h2 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><Package className="w-5 h-5" /> Situación Actual</h2>
-            {productosActuales.map((p) => (
-              <div key={p.id} className="flex gap-2 mb-2">
-                <input className="flex-grow p-2 rounded-lg border text-sm" value={p.descripcion} onChange={(e) => setProductosActuales(productosActuales.map(item => item.id === p.id ? {...item, descripcion: e.target.value} : item))} />
-                <input type="number" className="w-24 p-2 rounded-lg border text-sm text-right" value={p.valor} onChange={(e) => setProductosActuales(productosActuales.map(item => item.id === p.id ? {...item, valor: Number(e.target.value)} : item))} />
-                <button onClick={() => setProductosActuales(productosActuales.filter(i => i.id !== p.id))} className="text-red-400"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            ))}
-            <button onClick={() => setProductosActuales([...productosActuales, { id: Date.now(), descripcion: '', valor: 0 }])} className="w-full mt-2 py-2 border-2 border-dashed rounded-xl text-slate-400 text-sm font-medium transition hover:border-slate-300">+ Agregar ítem</button>
-          </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="bg-white rounded-2xl shadow-sm border p-6">
+                                <h2 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><Package className="w-5 h-5" /> Situación Actual</h2>
+                                {productosActuales.map((p) => (
+                                    <div key={p.id} className="flex gap-2 mb-2">
+                                        <input className="flex-grow p-2 rounded-lg border text-sm" value={p.descripcion} onChange={(e) => setProductosActuales(productosActuales.map(item => item.id === p.id ? {...item, descripcion: e.target.value} : item))} />
+                                        <input type="number" className="w-24 p-2 rounded-lg border text-sm text-right" value={p.valor} onChange={(e) => setProductosActuales(productosActuales.map(item => item.id === p.id ? {...item, valor: Number(e.target.value)} : item))} />
+                                        <button onClick={() => setProductosActuales(productosActuales.filter(i => i.id !== p.id))} className="text-red-400"><Trash2 className="w-4 h-4" /></button>
+                                    </div>
+                                ))}
+                                <button onClick={() => setProductosActuales([...productosActuales, { id: Date.now(), descripcion: '', valor: 0 }])} className="w-full mt-2 py-2 border-2 border-dashed rounded-xl text-slate-400 text-sm font-medium transition hover:border-slate-300">+ Agregar ítem</button>
+                            </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border-2 border-indigo-100 p-6">
-            <h2 className="font-bold text-indigo-900 mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Nueva Propuesta</span>
-              <button onClick={igualarOferta} className="text-xs bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 hover:bg-indigo-200 flex items-center gap-1 transition"><RefreshCw className="w-3 h-3" /> Igualar a Base</button>
-            </h2>
-            {productosNuevos.map((p) => (
-              <div key={p.id} className="grid grid-cols-12 gap-2 items-center mb-2 bg-slate-50 p-2 rounded-lg">
-                <select className="col-span-5 p-1.5 text-xs rounded border" value={p.tipo} onChange={(e) => {
-                  const item = tarifarioNuevos.find(t => t.id === e.target.value);
-                  const factor = periodicidad === 'anual' ? 12 : 1;
-                  setProductosNuevos(productosNuevos.map(itemN => itemN.id === p.id ? {...itemN, tipo: e.target.value, valorFinal: (item?.precioBaseSugeridoMensual || 0) * factor} : itemN));
-                }}>
-                  <option value="">Seleccionar...</option>
-                  {categorias.map(cat => (
-                    <optgroup key={cat} label={cat}>
-                      {tarifarioNuevos.filter(t => t.categoria === cat).map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                    </optgroup>
-                  ))}
-                </select>
-                <input type="number" className="col-span-2 p-1.5 text-center text-xs rounded border" placeholder="Cant" value={p.cantidad} onChange={(e) => setProductosNuevos(productosNuevos.map(i => i.id === p.id ? {...i, cantidad: Number(e.target.value)} : i))} />
-                <input type="number" className="col-span-4 p-1.5 text-right text-xs rounded border" placeholder="Precio" value={p.valorFinal} onChange={(e) => setProductosNuevos(productosNuevos.map(i => i.id === p.id ? {...i, valorFinal: Number(e.target.value)} : i))} />
-                <button onClick={() => setProductosNuevos(productosNuevos.filter(i => i.id !== p.id))} className="col-span-1 text-red-400"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            ))}
-            <button onClick={() => setProductosNuevos([...productosNuevos, { id: Date.now(), tipo: '', valorFinal: 0, cantidad: 1 }])} className="w-full mt-2 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-medium transition hover:bg-indigo-100">+ Agregar ítem</button>
-          </div>
-        </div>
+                            <div className="bg-white rounded-2xl shadow-sm border-2 border-indigo-100 p-6">
+                                <h2 className="font-bold text-indigo-900 mb-4 flex items-center justify-between">
+                                    <span className="flex items-center gap-2"><Plus className="w-5 h-5" /> Nueva Propuesta</span>
+                                    <button onClick={igualarOferta} className="text-xs bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 hover:bg-indigo-200 flex items-center gap-1 transition"><RefreshCw className="w-3 h-3" /> Igualar a Base</button>
+                                </h2>
+                                {productosNuevos.map((p) => (
+                                    <div key={p.id} className="grid grid-cols-12 gap-2 items-center mb-2 bg-slate-50 p-2 rounded-lg">
+                                        <select className="col-span-4 p-1.5 text-xs rounded border" value={p.tipo} onChange={(e) => {
+                                            const item = tarifarioNuevos.find(t => t.id === e.target.value);
+                                            const factor = periodicidad === 'anual' ? 12 : 1;
+                                            setProductosNuevos(productosNuevos.map(itemN => itemN.id === p.id ? {...itemN, tipo: e.target.value, valorFinal: (item?.precioBaseSugeridoMensual || 0) * factor} : itemN));
+                                        }}>
+                                            <option value="">Seleccionar...</option>
+                                            {categorias.map(cat => (
+                                                <optgroup key={cat} label={cat}>
+                                                    {tarifarioNuevos.filter(t => t.categoria === cat).map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                                                </optgroup>
+                                            ))}
+                                        </select>
+                                        <input type="number" className="col-span-2 p-1.5 text-center text-xs rounded border" placeholder="Cant" value={p.cantidad} onChange={(e) => setProductosNuevos(productosNuevos.map(i => i.id === p.id ? {...i, cantidad: Number(e.target.value)} : i))} />
+                                        <input type="number" className="col-span-4 p-1.5 text-right text-xs rounded border" placeholder="Precio" value={p.valorFinal} onChange={(e) => setProductosNuevos(productosNuevos.map(i => i.id === p.id ? {...i, valorFinal: Number(e.target.value)} : i))} />
+                                        <button onClick={() => setProductosNuevos(productosNuevos.filter(i => i.id !== p.id))} className="col-span-1 text-red-400"><Trash2 className="w-4 h-4" /></button>
+                                    </div>
+                                ))}
+                                <button onClick={() => setProductosNuevos([...productosNuevos, { id: Date.now(), tipo: '', valorFinal: 0, cantidad: 1 }])} className="w-full mt-2 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-medium transition hover:bg-indigo-100">+ Agregar ítem</button>
+                            </div>
+                        </div>
 
-        <div className="bg-slate-900 rounded-2xl p-8 text-white shadow-xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div><span className="text-slate-400 text-xs uppercase tracking-wider">Total Nuevo</span><div className="text-3xl font-bold">{formatMoneda(resumen.totalNuevo)}</div></div>
-            <div><span className="text-slate-400 text-xs uppercase tracking-wider">Objetivo</span><div className="text-2xl text-slate-300">{formatMoneda(presupuestoActual)}</div></div>
-            <div><span className="text-slate-400 text-xs uppercase tracking-wider">Upsell</span><div className={`text-3xl font-bold ${resumen.upsell >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{formatMoneda(resumen.upsell)}</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+                        <div className="bg-slate-900 rounded-2xl p-8 text-white shadow-xl">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                <div><span className="text-slate-400 text-xs uppercase tracking-wider">Total Nuevo</span><div className="text-3xl font-bold">{formatMoneda(resumen.totalNuevo)}</div></div>
+                                <div><span className="text-slate-400 text-xs uppercase tracking-wider">Objetivo</span><div className="text-2xl text-slate-300">{formatMoneda(presupuestoActual)}</div></div>
+                                <div><span className="text-slate-400 text-xs uppercase tracking-wider">Upsell</span><div className={`text-3xl font-bold ${resumen.upsell >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{formatMoneda(resumen.upsell)}</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
